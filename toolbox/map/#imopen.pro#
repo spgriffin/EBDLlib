@@ -1,0 +1,58 @@
+; save imopen_imclose common block dataa
+filetype = type
+filename = fn
+want_progressive = keyword_set(progressive)
+if n_elements(jpegquality) gt 0 then quality = jpegquality else quality = 85
+
+
+; *****set plot to device type wanted
+case  strupcase(type)  of
+    'GIF' : begin
+        set_plot, 'Z'
+        device, set_resolution = [xsize, ysize]
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'PNG' : begin
+        set_plot, 'Z'
+        device, set_resolution = [xsize, ysize]
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'JPG': begin
+        set_plot, 'Z'
+        device, set_resolution = [xsize, ysize]
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'JPEG' : begin
+        set_plot, 'Z'
+        device, set_resolution = [xsize, ysize]
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'CPS' : begin
+        set_plot, 'PS'
+        device, file = fn+'.cps', /color, encap = 0, land = land, port = port,  $
+               /inch, xsize = xsize, ysize = ysize, xoffset = xoffset, yoffset = yoffset
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'EPS' : begin
+        set_plot, 'PS'
+        device, file = fn+'.eps', color = color, encap = 1, land = land, port = port,  $
+               /inch, xsize = xsize, ysize = ysize, xoffset = xoffset, yoffset = yoffset
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'PS'  : begin
+        set_plot, 'PS'
+        device, file = fn+'.ps', color = color, encap = 0, land = land, port = port,  $
+               /inch, xsize = xsize, ysize = ysize, xoffset = xoffset, yoffset = yoffset
+        if  (n_elements(color) ne 0)  then  loadct, color
+    end
+    'TEK' : begin
+        set_plot, 'TEK'
+        device, /tek4100, file = fn+'.tek', /tty
+    end
+    else  : begin
+        message, /cont, 'Type must be TEK, PS, EPS, CPS, JPEG, JPG, GIF or PNG - Respecify'
+        return
+    end
+endcase
+return
+end

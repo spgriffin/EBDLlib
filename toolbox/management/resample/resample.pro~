@@ -1,0 +1,33 @@
+PRO  resample,workspace_in,workspace_out,prefix_in,factor,start_year,end_year
+  ENVI, /restore_base_save_files
+  ENVI_BATCH_INIT, log_file = 'batch.txt', /NO_STATUS_WINDOW
+  tiff_extension = '.tif'
+  ;the spatial resolution for MODIS land surface product
+  ;start the year loop
+  FOR iyear = start_year, end_year, 1 DO BEGIN
+    year_str = STRING(iyear, format = '(i04)')
+    year_in = workspace_in+!backslash+year_str
+    year_out = workspace_out+!backslash+year_str
+    IF(FILE_TEST(year_out) NE 1)THEN BEGIN
+      FILE_MKDIR, year_out
+    ENDIF
+    filename_regex = prefix_in+year_str+'*'+tiff_extension
+    match_files = FILE_SEARCH(year_in, filename_regex, /FULLY_QUALIFY_PATH, COUNT = file_count)
+    IF(file_count GT 0) THEN BEGIN
+      FOR f = 0, file_count-1, 1 DO BEGIN
+        filename=FILE_BASENAME( match_files[f],tiff_extension )
+        ENVI_OPEN_FILE, match_files[f], r_fid = r_fid
+        ;resample the result after the mosaic
+        out_name =  year_out+!backslash+STRMID(filename, STRLEN(prefix_in), 10)+'_resmaple'+ tiff_extension
+        ENVI_FILE_QUERY, r_fid, dims = dims, nb = nb
+        ENVI_DOIT, 'resize_doit', $
+          fid = r_fid, pos = 0, dims = dims, $
+          interp = 0, rfact = [factor, factor], $
+          out_name = out_name
+        ENVI_FILE_MNG, id = r_fid, /remove
+      ENDFOR                  ;mosaicing loop
+    ENDIF
+  ENDFOR
+  PRINT, 'Finished'
+  ENVI_BATCH_EXIT
+END
